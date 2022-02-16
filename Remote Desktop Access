@@ -1,0 +1,10 @@
+#This will allow you to connect to the user without prompting for their permission
+
+$ComputerName = Read-Host("Enter ComputerName: ") 
+
+Invoke-Command -computername $computername {Set-ItemProperty -Path "HKLM:\\SOFTWARE\Microsoft\SMS\Client\Client Components\Remote Control" -Name "Permission Required" -Value "0"}
+
+pause
+
+Invoke-Command -computername $computername {Set-ItemProperty -Path "HKLM:\\SOFTWARE\Microsoft\SMS\Client\Client Components\Remote Control" -Name "Permission Required" -Value "0"}
+Write-Host "Permission back to default"
