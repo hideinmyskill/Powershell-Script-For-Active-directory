@@ -1,0 +1,28 @@
+#add number of people function
+#This allows any amount of people to be added to the group in Active Directory
+# make sure that the name that was provided in the names.txt file are full names that are registered in the AD
+#Code Example
+# Add-MemberToGroup -path "c:/user/desktop/names.txt" -group "Name of the group"
+
+funtion Add-MemberToGroup{
+  param(
+    [string]$path,
+    [string]$group
+  )
+  $filedata = Get-Content $path
+  
+  $number_names = 0
+  foreach($names in $filedata) {
+    $user = Get-ADuser -Filter {name -eq $names} -Searchbase "DC=domain, DC=path" | Select -ExpandProperty SamAccountName
+    Add-ADGroupMemeber -Identity $group -Member $user
+    $number_names++
+    
+    Write-Host $names "is added to " $group
+  }
+  #sync active directory to Azure directory
+  $AzureADSession = New-PSSession - ComputerName $computername - credentials $adminUsername
+  Invoke-Command -Session $AzureADSession -ScriptBlock{Import-Module -Name 'ADsync'}
+  Invoke-Command -Session $AzureADSession -ScriptBlock{Start-ADSyncSyncCycle -PolicyType Delta}
+  Invoke-Command -Session $AzureADSession -ScriptBlock{exit}
+  Remove-PSSession $AzureADSession 
+}
